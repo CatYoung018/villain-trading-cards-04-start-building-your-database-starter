@@ -4,8 +4,10 @@ from datetime import datetime
 
 # Initialize the Flask application
 app = Flask(__name__)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///villain.db'
 db = SQLAlchemy(app)
+
 
 # Define the Villain model
 class Villain(db.Model):
@@ -37,13 +39,13 @@ def add_user():
     errors = []
     name = request.form.get("name")
     if not name:
-      errors.append("Oops! Looks like you forgot a name!")
+       errors.append("Oops! Looks like you forgot a name!")
     description = request.form.get("description")
     if not description:
-     errors.append("Oops! Looks like you forgot a description!")
+       errors.append("Oops! Looks like you forgot a description!")
     interests = request.form.get("interests")
     if not interests:
-     errors.append("Oops! Looks like you forgot some interests!")
+        errors.append("Oops! Looks like you forgot some interests!")
     url = request.form.get("url")
     if not url:
       errors.append("Oops! Looks like you forgot an image!")
@@ -51,7 +53,20 @@ def add_user():
     if villain:
       errors.append("Oops! A villain with that name already exists!")
 
-    
+    if villain:
+      errors.append("Oops! A villain with that name already exists!")
+
+    if errors:
+      return render_template("addvillain.html", errors=errors)
+    else:
+      new_villain = Villain(name=name, 
+                            description=description, 
+                            interests=interests, 
+                            url=url)
+      db.session.add(new_villain)
+      db.session.commit()
+      return render_template("villain.html", villains=Villain.query.all())
+
     
 
 # Run the flask server
