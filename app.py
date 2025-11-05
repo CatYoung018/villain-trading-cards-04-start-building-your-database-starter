@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -18,11 +18,41 @@ class Villain(db.Model):
 
     def __repr__(self):
         return f"<Villain "+ self.name + ">"
-
+    
+    with app.app_context():
+        db.create_all()
+        db.session.commit()
 
 @app.route("/")
-def hello_world():
-  return render_template("villain.html")
+def villains_cards():
+	return render_template("villain.html")
+
+
+@app.route("/add", methods=["GET"])
+def add_villain():
+  return render_template("addvillain.html", errors=[])
+
+@app.route("/addvillain", methods=["POST"])
+def add_user():
+    errors = []
+    name = request.form.get("name")
+    if not name:
+      errors.append("Oops! Looks like you forgot a name!")
+    description = request.form.get("description")
+    if not description:
+     errors.append("Oops! Looks like you forgot a description!")
+    interests = request.form.get("interests")
+    if not interests:
+     errors.append("Oops! Looks like you forgot some interests!")
+    url = request.form.get("url")
+    if not url:
+      errors.append("Oops! Looks like you forgot an image!")
+      villain = Villain.query.filter_by(name=name).first()
+    if villain:
+      errors.append("Oops! A villain with that name already exists!")
+
+    
+    
 
 # Run the flask server
 if __name__ == "__main__":
